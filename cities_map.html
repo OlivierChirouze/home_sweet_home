@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Carte communes</title>
+    <script>
+
+        function getJson(jsonUrl, callback) {
+            let request = new XMLHttpRequest();
+            request.onload = callback;
+            request.open('GET', jsonUrl);
+            request.send();
+        }
+
+        function addScript(scriptSrc) {
+            let header = document.getElementsByTagName("head")[0];
+            let scriptTag = document.createElement("script");
+            scriptTag.type = "text/javascript";
+            scriptTag.src = scriptSrc;
+            header.appendChild(scriptTag);
+        }
+
+        let cities = [];
+        let config = {};
+
+        getJson('config.json', function () {
+            config = JSON.parse(this.responseText);
+
+            for (let i in config.destinations) {
+                let dest = config.destinations[i];
+                let button = document.createElement('button');
+                button.innerText = dest.for;
+                button.onclick = () => {
+                    window.type = i === 0 ? 'o' : 'c'; // TODO fix this
+                    updateMarkers();
+                };
+                document.querySelector('#header').appendChild(button);
+                // TODO <button onclick="window.type='o_d';updateMarkers();">voiture olivier</button>
+            }
+
+            getJson('cities.json', function () {
+                cities = JSON.parse(this.responseText).cities;
+                addScript("https://maps.googleapis.com/maps/api/js?key=" + config.key + "&callback=initMap");
+            });
+        });
+
+
+        const type = "order";
+
+        let map;
+
+        let max = 30;
+
+        function getColorFromOrder(i) {
+            // TODO could be configurable
+            let color;
+            if (i <= 20) {
+                color = "#40ff00";
+            } else if (i <= 40) {
+                color = "#54fcff";
+            } else if (i <= 60) {
+                color = "#ffd176";
+            } else {
+                color = "#ff0000";
+            }
+
+            return color
+        }
+
+        function updateMarkers() {
+            for (let i in cities) {
+
+                let city = cities[i];
+
+                if ((Number(i) + 1) <= max) {
+                    switch (type) {
+                        case "order":
+                        case "order_name":
+                            label = "" + (Number(i) + 1);
+                            if (type === "order_name") label += " " + city.n;
+                            color = getColorFromOrder(i);
+                            break;
+                        case 0:
+                        case 1:
+                            label = "" + (type === 0 ? city.o : city.c); // TODO use index
+                            let destConfig = config.destinations[type];
+                            color = getColorFromDuration(city.c, destConfig.lower, destConfig.middle, destConfig.max);
+                            break;
+                            // TODO
+                            /*
+                        case "o_d":
+                            label = "" + city.o_d;
+                            color = getColorFromDuration(city.o_d, 5, 10, 20);
+                            break;
+                            */
+                    }
+
+                    city.marker.label.text = label;
+                    city.marker.icon.fillColor = color;
+                    city.marker.icon.strokeColor = color;
+
+                    city.marker.opacity = 1;
+                } else {
+                    city.marker.opacity = 0;
+                }
+
+                // Refresh
+                city.marker.setMap(null);
+                city.marker.setMap(map);
+            }
+        }
+
+        function getColorFromDuration(durationString, a, b, c) {
+            let dur = getDuration(durationString);
+            let color;
+            if (dur <= a) {
+                color = "#40ff00";
+            } else if (dur <= b) {
+                color = "#54fcff";
+            } else if (dur <= c) {
+                color = "#ffd176";
+            } else {
+                color = "#ff0000";
+            }
+
+            return color;
+        }
+
+        function getDuration(durationString) {
+            const arr = durationString.split(":");
+            return Number(arr[0]) * 60 + Number(arr[1]);
+        }
+
+        function getUrl(city) {
+            const cityLocation = Number(city.lat.replace(',', '.')) + "," + Number(city.lng.replace(',', '.'));
+            const url = "https://www.google.com/maps/dir/"
+                + encodeURIComponent(city.via)
+                + "/" + cityLocation
+                + "/" + encodeURIComponent("115 Chemin de l'Islon, 38670 Chasse-sur-Rhône")
+                + "/@45.4719624,5.0736569,11z/";
+            return url;
+        }
+
+        function initMap() {
+            const geocoder = new google.maps.Geocoder();
+
+            function addMarker(position) {
+
+                const displayPos = Number(position) + 1;
+
+                const city = cities[position];
+
+                const location = {
+                    lat: Number(city.lat.replace(',', '.')),
+                    lng: Number(city.lng.replace(',', '.'))
+                };
+                if (!map) {
+                    map = new google.maps.Map(document.getElementById('map'), {
+                        zoom: 11,
+                        center: location
+                    });
+                }
+
+                // https://developers.google.com/maps/documentation/javascript/reference/3.exp/marker#MarkerOptions
+                city.marker = new google.maps.Marker({
+                    position: location,
+                    label: {
+                        text: "...",
+                        fontSize: "10px"
+                    },
+                    icon: {
+                        path: google.maps.SymbolPath.CIRCLE,
+                        scale: 10,
+                        fillColor: "#eee",
+                        fillOpacity: 1,
+                        strokeColor: "#eee"
+                    },
+                    title: city.n + "\n"
+                        + "o : " + city.o + " (" + city.o_d + ")\n"
+                        + "c : " + city.c + "\n"
+                        + "via " + city.via,
+                    map: map,
+                    zIndex: 1 / displayPos,
+                    clickable: true,
+                    opacity: 0
+                });
+
+                city.marker.addListener('click', function (event) {
+                    const url = getUrl(city);
+
+                    window.open(
+                        url,
+                        city.n
+                    );
+                });
+            }
+
+            for (let position in cities) {
+                addMarker(position);
+            }
+
+            document.getElementById("max").value = max;
+
+            updateMarkers();
+        }
+    </script>
+    <style>
+        #map {
+            height: 700px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+<div id="header">
+    top :
+    <select id="max" onchange="console.log(this.value);max=this.value;updateMarkers()">
+        <option>10</option>
+        <option>20</option>
+        <option>30</option>
+        <option>40</option>
+        <option>50</option>
+        <option>60</option>
+        <option>80</option>
+        <option>90</option>
+        <option>100</option>
+        <option>110</option>
+    </select>
+    <button onclick="window.type='order';updateMarkers();">classement</button>
+    <button onclick="window.type='order_name';updateMarkers();">noms communes</button>
+</div>
+<div id="map"></div>
+</body>
+</html>

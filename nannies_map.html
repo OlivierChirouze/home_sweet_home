@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Carte nounous</title>
+    <script>
+
+        function getJson(jsonUrl, callback) {
+            let request = new XMLHttpRequest();
+            request.onload = callback;
+            request.open('GET', jsonUrl);
+            request.send();
+        }
+
+        function addScript(scriptSrc) {
+            let header = document.getElementsByTagName("head")[0];
+            let scriptTag = document.createElement("script");
+            scriptTag.type = "text/javascript";
+            scriptTag.src = scriptSrc;
+            header.appendChild(scriptTag);
+        }
+
+        var nannies = [];
+        var config = {};
+        var map
+
+        getJson('config.json', function () {
+            config = JSON.parse(this.responseText);
+
+            getJson('nannies.json', function () {
+                nannies = JSON.parse(this.responseText).nannies;
+                addScript("https://maps.googleapis.com/maps/api/js?key=" + config.key + "&callback=initMap");
+            });
+        });
+
+        function updateMarkers() {
+            for (let i in nannies) {
+
+                let nanny = nannies[i];
+
+                label = nanny.name;
+                if (i <= 5) {
+                    color = "#40ff00";
+                } else if (i <= 8) {
+                    color = "#54fcff";
+                } else if (i <= 12) {
+                    color = "#ffd176";
+                } else {
+                    color = "red";
+                }
+
+                nanny.marker.label.text = label;
+                nanny.marker.icon.fillColor = color;
+                nanny.marker.icon.strokeColor = color;
+
+                nanny.marker.opacity = 1;
+
+                // Refresh
+                nanny.marker.setMap(null);
+                nanny.marker.setMap(map);
+            }
+        }
+
+        function getColorFromDuration(durationString, a, b, c) {
+            let dur = getDuration(durationString);
+            let color;
+            if (dur <= a) {
+                color = "#40ff00";
+            } else if (dur <= b) {
+                color = "#54fcff";
+            } else if (dur <= c) {
+                color = "#ffd176";
+            } else {
+                color = "red";
+            }
+
+            return color;
+        }
+
+        function getDuration(durationString) {
+            var arr = durationString.split(":");
+            return Number(arr[0]) * 60 + Number(arr[1]);
+        }
+
+        var previousLocation = null
+
+        function initMap() {
+            for (let position in nannies) {
+                var displayPos = Number(position) + 1;
+                var nanny = nannies[position];
+
+                var location = {
+                    lat: Number(nanny.lat),
+                    lng: Number(nanny.lng)
+                };
+
+                var diff
+                if (previousLocation) {
+                    diff = previousLocation.lat - location.lat + previousLocation.lng - location.lng
+                    console.log(diff)
+                } else {
+                    diff = 12
+                }
+
+                previousLocation = location
+
+                const homeLocation = {
+                    lat: 45.451148,
+                    lng: 5.290227
+                };
+                if (!map) {
+                    map = new google.maps.Map(document.getElementById('map'), {
+                        zoom: 15,
+                        center: homeLocation
+                    });
+                    console.log("map created: " + map)
+                }
+                // https://developers.google.com/maps/documentation/javascript/reference/3.exp/marker#MarkerOptions
+                nanny.marker = new google.maps.Marker({
+                    position: {
+                        lat: diff === 0 ? location.lat - 0.0001 : location.lat,
+                        lng: location.lng,
+                    },
+                    label: {
+                        text: "...",
+                        fontSize: "10px",
+                        fontWeight: "bold"
+                    },
+                    icon: {
+                        path: google.maps.SymbolPath.CIRCLE,
+                        scale: 8,
+                        fillColor: "#eee",
+                        fillOpacity: 1,
+                        strokeColor: "#eee"
+                    },
+                    title: nanny.name + "\n"
+                    + "à pied : " + nanny.walking + "\n"
+                    + "en voiture : " + nanny.driving + "\n",
+                    map: map,
+                    zIndex: 1 / displayPos,
+                    clickable: true,
+                    opacity: 0
+                });
+                nanny.marker.addListener('click', function (event) {
+                    window.open(
+                        "https://www.google.com/maps/dir/"
+                        + homeLocation.lat + "," + homeLocation.lng
+                        + "/" +
+                        nanny.lat + "," + nanny.lng,
+                        nanny.name
+                    );
+                });
+            }
+
+            updateMarkers();
+        }
+    </script>
+    <style>
+        #map {
+            height: 1024px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+<div id="map"></div>
+</body>
+</html>
