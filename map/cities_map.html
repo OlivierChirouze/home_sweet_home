@@ -3,8 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title>Carte communes</title>
-    <script src="../build/cities_map.js">
-    </script>
     <style>
         #map {
             height: 700px;
@@ -27,9 +25,10 @@
         <option>100</option>
         <option>110</option>
     </select>
-    <button onclick="window.type='order';updateMarkers();">classement</button>
-    <button onclick="window.type='order_name';updateMarkers();">noms communes</button>
+    <button onclick="type='order';updateMarkers();">classement</button>
+    <button onclick="type='order_name';updateMarkers();">noms communes</button>
 </div>
 <div id="map"></div>
+<script src="../build/cities_map.js"></script>
 </body>
 </html>

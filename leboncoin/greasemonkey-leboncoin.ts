@@ -23,11 +23,6 @@ function getCUrl(city: City) {
         + "/" + encodeURIComponent("115 Chemin de l'Islon, 38670 Chasse-sur-Rhône"); // FIXME
 }
 
-function getDuration(durationString: string) {
-    let arr = durationString.split(":");
-    return Number(arr[0]) * 60 + Number(arr[1]);
-}
-
 let paragraphs = document.getElementsByTagName("p");
 
 function addCell(index: string, colorFromOrder: string, row: HTMLTableRowElement) {

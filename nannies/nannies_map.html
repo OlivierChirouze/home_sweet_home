@@ -62,7 +62,7 @@
         }
 
         function getColorFromDuration(durationString, a, b, c) {
-            let dur = getDuration(durationString);
+            let dur = parseDuration(durationString);
             let color;
             if (dur <= a) {
                 color = "#40ff00";
@@ -75,11 +75,6 @@
             }
 
             return color;
-        }
-
-        function getDuration(durationString) {
-            var arr = durationString.split(":");
-            return Number(arr[0]) * 60 + Number(arr[1]);
         }
 
         var previousLocation = null
