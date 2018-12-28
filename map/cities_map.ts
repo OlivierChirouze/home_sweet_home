@@ -9,7 +9,7 @@ function addScript(scriptSrc: string) {
 
 let type = "order";
 
-let map: any;
+let map: google.maps.Map;
 
 let max = 30;
 
@@ -82,10 +82,6 @@ function updateMarkers() {
 function initMap() {
     const geocoder = new google.maps.Geocoder();
 
-    let map: google.maps.Map;
-
-    let maxInput = (<any>document).getElementById("max")
-
     function addMarker(position: number): void {
 
         const displayPos = position + 1;
@@ -140,8 +136,6 @@ function initMap() {
     }
     
     cities.forEach((city: City, position: number) => addMarker(position))
-
-    maxInput.value = max
 
     updateMarkers();
 }

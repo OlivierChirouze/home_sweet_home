@@ -51,6 +51,7 @@ let isATrainDestination = (o: DestinationByCar|DestinationByTrain) => ("trainSta
 
 // TODO move these methods to a dedicated file
 function getColorFromOrder(i: number) {
+    // TODO could be configurable
     let color;
     if (i <= 20) {
         color = "#40ff00";
