@@ -19,6 +19,7 @@
   "homepage": "https://github.com/OlivierChirouze/bidouilles#readme",
   "dependencies": {
     "@types/google-apps-script": "0.0.32",
+    "@types/googlemaps": "^3.30.16",
     "@types/greasemonkey": "0.0.28",
     "@types/node": "^10.12.12",
     "google-apps-script": "^2.9.2",

@@ -1,16 +1,13 @@
-/// <reference path="./index.d.ts" />
+/// <reference path="./model.ts" />
+/// <reference path="./config.ts" />
 
 // To test this with node JS:
 // node -e 'require("./google_apps/home_sweet_home").run();'
 // Expects a config.json file in this directory: see config.example.json
 
 import * as http from "http";
-import * as configFile from './config.json';
 import Spreadsheet = GoogleAppsScript.Spreadsheet.Spreadsheet
 import Sheet = GoogleAppsScript.Spreadsheet.Sheet
-
-
-let config: Config = configFile["default"];
 
 // ============================================================================================== COPY / PASTE FROM HERE
 // To make this work on Google Spreadsheet,
@@ -59,15 +56,6 @@ function getKnownStation(knownTrainStations: TrainStation[], name: string): Trai
     }
 
     return undefined;
-}
-
-interface Journey {
-    from: string,
-    via: string,
-    drivingDuration: number,
-    trainDuration: number,
-    isDirect: boolean,
-    isOk: boolean,
 }
 
 function runTest() {

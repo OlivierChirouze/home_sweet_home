@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Carte communes</title>
+    <script src="../build/cities_map.js">
+    </script>
+    <style>
+        #map {
+            height: 700px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+<div id="header">
+    top :
+    <select id="max" onchange="console.log(this.value);max=this.value;updateMarkers()">
+        <option>10</option>
+        <option>20</option>
+        <option>30</option>
+        <option>40</option>
+        <option>50</option>
+        <option>60</option>
+        <option>80</option>
+        <option>90</option>
+        <option>100</option>
+        <option>110</option>
+    </select>
+    <button onclick="window.type='order';updateMarkers();">classement</button>
+    <button onclick="window.type='order_name';updateMarkers();">noms communes</button>
+</div>
+<div id="map"></div>
+</body>
+</html>
