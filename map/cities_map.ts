@@ -1,3 +1,5 @@
+/// /// <reference path="./model.ts" /> ../node_modules/stats-lite/stats.js
+
 function addScript(scriptSrc: string) {
     let header = document.getElementsByTagName("head")[0];
     let scriptTag = document.createElement("script");
@@ -6,12 +8,10 @@ function addScript(scriptSrc: string) {
     header.appendChild(scriptTag);
 }
 
-
 let type = "order";
 
 let map: google.maps.Map;
-
-let max = 30;
+let markedCities: MarkedCity[] = [];
 
 interface MarkedCity extends City {
     marker: google.maps.Marker;
@@ -20,9 +20,9 @@ interface MarkedCity extends City {
 config.destinations.forEach((dest: any, i: number) => {
         let button = document.createElement('button');
         button.innerText = dest.for;
+        button.className = "mdl-button mdl-js-button";
         button.onclick = () => {
-            type = i === 0 ? 'o' : 'c'; // TODO fix this
-            updateMarkers();
+            updateMarkers(i.toString());
         };
         (<any>document).querySelector('#header').appendChild(button);
         // TODO <button onclick="window.type='o_d';updateMarkers();">voiture olivier</button>
@@ -32,49 +32,52 @@ config.destinations.forEach((dest: any, i: number) => {
 addScript("https://maps.googleapis.com/maps/api/js?key=" + config.key + "&callback=initMap");
 
 
-function updateMarkers() {
-    cities.forEach((c: City, i: number) => {
-            let city = <MarkedCity>c;
+function updateMarkers(newType: string = type) {
+    type = newType
+    let max = (<any>document).getElementById("max").value
 
+    markedCities.forEach((markedCity: MarkedCity, i: number) => {
             if (i + 1 <= max) {
                 let label = "";
                 let color = "";
 
                 switch (type) {
                     case "order":
-                    case "order_name":
+                    case "name":
                         label = "" + (i + 1);
-                        if (type === "order_name") label += " " + city.n;
+                        if (type === "name") label += " " + markedCity.n;
                         color = getColorFromOrder(i);
                         break;
                     case "0":
                     case "1":
-                        label = "" + (type === "0" ? city.o : city.c); // TODO use index
+                        // TODO use index
+                        let duration = (type === "0" ? markedCity.o : markedCity.c);
+                        label = "" + duration;
                         let destConfig = config.destinations[Number(type)];
-                        color = getColorFromDuration(city.c, destConfig.lower, destConfig.middle, destConfig.max);
+                        color = getColorFromDuration(duration, destConfig.lower, destConfig.middle, destConfig.max);
                         break;
                     // TODO
                     /*
                 case "o_d":
-                    label = "" + city.o_d;
-                    color = getColorFromDuration(city.o_d, 5, 10, 20);
+                    label = "" + markedCity.o_d;
+                    color = getColorFromDuration(markedCity.o_d, 5, 10, 20);
                     break;
                     */
                 }
 
-                city.marker.setLabel(label);
-                let icon = (<google.maps.Symbol>city.marker.getIcon());
+                markedCity.marker.setLabel(label);
+                let icon = (<google.maps.Symbol>markedCity.marker.getIcon());
                 icon.fillColor = color;
                 icon.strokeColor = color;
 
-                city.marker.setOpacity(1);
+                markedCity.marker.setOpacity(1);
             } else {
-                city.marker.setOpacity(0);
+                markedCity.marker.setOpacity(0);
             }
 
             // Refresh
-            city.marker.setMap(null);
-            city.marker.setMap(map);
+            markedCity.marker.setMap(null);
+            markedCity.marker.setMap(map);
         }
     )
 }
@@ -86,11 +89,11 @@ function initMap() {
 
         const displayPos = position + 1;
 
-        const city = <MarkedCity>cities[position];
+        const markedCity = <MarkedCity>cities[position];
 
         const location = {
-            lat: Number(city.lat.replace(',', '.')),
-            lng: Number(city.lng.replace(',', '.'))
+            lat: Number(markedCity.lat.replace(',', '.')),
+            lng: Number(markedCity.lng.replace(',', '.'))
         };
 
         if (map === undefined) {
@@ -102,7 +105,7 @@ function initMap() {
         }
 
         // https://developers.google.com/maps/documentation/javascript/reference/3.exp/marker#MarkerOptions
-        city.marker = new google.maps.Marker({
+        markedCity.marker = new google.maps.Marker({
             position: location,
             label: {
                 text: "...",
@@ -115,27 +118,29 @@ function initMap() {
                 fillOpacity: 1,
                 strokeColor: "#eee"
             },
-            title: city.n + "\n"
-                + "o : " + city.o + " (" + city.o_d + ")\n"
-                + "c : " + city.c + "\n"
-                + "via " + city.via,
+            title: markedCity.n + "\n"
+                + "o : " + markedCity.o + " (" + markedCity.o_d + ")\n"
+                + "c : " + markedCity.c + "\n"
+                + "via " + markedCity.via,
             map: map,
             zIndex: 1 / displayPos,
             clickable: true,
             opacity: 0
         });
 
-        city.marker.addListener('click', function (event) {
-            const url = getUrl(city);
+        markedCity.marker.addListener('click', function (event) {
+            const url = getUrl(markedCity);
 
             window.open(
                 url,
-                city.n
+                markedCity.n
             );
         });
+
+        markedCities.push(markedCity);
     }
     
     cities.forEach((city: City, position: number) => addMarker(position))
 
-    updateMarkers();
+    updateMarkers(type);
 }
