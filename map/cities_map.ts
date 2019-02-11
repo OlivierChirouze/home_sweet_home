@@ -1,5 +1,11 @@
 /// /// <reference path="./model.ts" /> ../node_modules/stats-lite/stats.js
 
+const forEach = function <T extends Node>(array: NodeListOf<T>, callback: (i: number, t: T) => any) {
+    for (let i = 0; i < array.length; i++) {
+        callback(i, array[i]); // passes back stuff we need
+    }
+};
+
 function addScript(scriptSrc: string) {
     let header = document.getElementsByTagName("head")[0];
     let scriptTag = document.createElement("script");
@@ -19,22 +25,22 @@ interface MarkedCity extends City {
 
 config.destinations.forEach((dest: any, i: number) => {
         let button = document.createElement('button');
+        let newType = i.toString();
         button.innerText = dest.for;
+        button.id = "btn_" + newType;
         button.className = "mdl-button mdl-js-button";
         button.onclick = () => {
-            updateMarkers(i.toString());
+            updateMarkers(newType);
         };
         (<any>document).querySelector('#header').appendChild(button);
-        // TODO <button onclick="window.type='o_d';updateMarkers();">voiture olivier</button>
     }
-)
+);
 
 addScript("https://maps.googleapis.com/maps/api/js?key=" + config.key + "&callback=initMap");
 
-
 function updateMarkers(newType: string = type) {
-    type = newType
-    let max = (<any>document).getElementById("max").value
+    type = newType;
+    let max = (<any>document).getElementById("max").value;
 
     markedCities.forEach((markedCity: MarkedCity, i: number) => {
             if (i + 1 <= max) {
@@ -50,19 +56,11 @@ function updateMarkers(newType: string = type) {
                         break;
                     case "0":
                     case "1":
-                        // TODO use index
-                        let duration = (type === "0" ? markedCity.o : markedCity.c);
-                        label = "" + duration;
+                        let duration = getDuration(markedCity, Number(type));
+                        label = duration.toString();
                         let destConfig = config.destinations[Number(type)];
                         color = getColorFromDuration(duration, destConfig.lower, destConfig.middle, destConfig.max);
                         break;
-                    // TODO
-                    /*
-                case "o_d":
-                    label = "" + markedCity.o_d;
-                    color = getColorFromDuration(markedCity.o_d, 5, 10, 20);
-                    break;
-                    */
                 }
 
                 markedCity.marker.setLabel(label);
@@ -79,7 +77,16 @@ function updateMarkers(newType: string = type) {
             markedCity.marker.setMap(null);
             markedCity.marker.setMap(map);
         }
-    )
+    );
+
+    // Reset previous tab
+    forEach(document.querySelectorAll<HTMLElement>(".currentTab"),
+        (i: number, e: HTMLElement) => e.classList.remove("currentTab")
+    );
+
+    let htmlElement = document.querySelector<HTMLElement>("#btn_" + type);
+    if (htmlElement)
+        htmlElement.classList.add("currentTab");
 }
 
 function initMap() {
@@ -105,6 +112,18 @@ function initMap() {
         }
 
         // https://developers.google.com/maps/documentation/javascript/reference/3.exp/marker#MarkerOptions
+        let title = markedCity.n;
+
+        config.destinations.forEach((dest: any, i: number) => {
+                title += `\n${dest.for}: ${getDuration(markedCity, i)}`;
+                if (isATrainDestination(dest))
+                    title += ` (${getDurationVia(markedCity, i)})\n`;
+            }
+        );
+
+        if (isATrainDestination(config.destinations[0]) || isATrainDestination(config.destinations[1]))
+            title += "via " + markedCity.via;
+
         markedCity.marker = new google.maps.Marker({
             position: location,
             label: {
@@ -118,10 +137,7 @@ function initMap() {
                 fillOpacity: 1,
                 strokeColor: "#eee"
             },
-            title: markedCity.n + "\n"
-                + "o : " + markedCity.o + " (" + markedCity.o_d + ")\n"
-                + "c : " + markedCity.c + "\n"
-                + "via " + markedCity.via,
+            title: title,
             map: map,
             zIndex: 1 / displayPos,
             clickable: true,
@@ -129,7 +145,11 @@ function initMap() {
         });
 
         markedCity.marker.addListener('click', function (event) {
-            const url = getUrl(markedCity);
+            const url = getFullUrl(
+                markedCity,
+                config.destinations[0],
+                config.destinations[1]
+            );
 
             window.open(
                 url,
@@ -139,8 +159,8 @@ function initMap() {
 
         markedCities.push(markedCity);
     }
-    
-    cities.forEach((city: City, position: number) => addMarker(position))
+
+    cities.forEach((city: City, position: number) => addMarker(position));
 
     updateMarkers(type);
 }

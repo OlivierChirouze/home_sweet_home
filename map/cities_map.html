@@ -3,39 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <title>Carte communes</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
     <style>
         #map {
             height: 700px;
             width: 100%;
         }
+
+        .currentTab, .currentTab:hover {
+            background-color: black;
+            color: white;
+        }
     </style>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
     <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
 </head>
 <body>
 <div id="header">
-
-
-    <div class="mdl-tabs mdl-js-tabs">
-        <div class="mdl-tabs__tab-bar" id="tab-bar">
-            top :
-            <select id="max" onchange="updateMarkers()">
-                <option>10</option>
-                <option>20</option>
-                <option selected>30</option>
-                <option>40</option>
-                <option>50</option>
-                <option>60</option>
-                <option>80</option>
-                <option>90</option>
-                <option>100</option>
-                <option>110</option>
-            </select>
-            <a href="javascript:updateMarkers('order');" class="mdl-tabs__tab" id="order">Classement</a>
-            <a href="javascript:updateMarkers('name');" class="mdl-tabs__tab" id="name">Noms</a>
-        </div>
-    </div>
+    top :
+    <select id="max" onchange="updateMarkers()">
+        <option>10</option>
+        <option>20</option>
+        <option selected>30</option>
+        <option>40</option>
+        <option>50</option>
+        <option>60</option>
+        <option>80</option>
+        <option>90</option>
+        <option>100</option>
+        <option>110</option>
+    </select>
+    <a href="javascript:updateMarkers('order');" class="mdl-button mdl-js-button" id="btn_order">Classement</a>
+    <a href="javascript:updateMarkers('name');" class="mdl-button mdl-js-button" id="btn_name">Noms</a>
 </div>
 <div id="map"></div>
 <script src="../build/cities_map.js"></script>

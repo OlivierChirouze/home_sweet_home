@@ -117,15 +117,28 @@ function parseDuration(durationString: string) {
     return Number(arr[0]) * 60 + Number(arr[1]);
 }
 
-function getUrl(city: City) {
-    const cityLocation = Number(city.lat.replace(',', '.')) + "," + Number(city.lng.replace(',', '.'));
-    const url = "https://www.google.com/maps/dir/"
-        + encodeURIComponent(city.via)
-        + "/" + cityLocation
-        // TODO update location
-        + "/" + encodeURIComponent("115 Chemin de l'Islon, 38670 Chasse-sur-Rhône")
-        + "/@45.4719624,5.0736569,11z/";
-    return url;
+function getDuration(city: City, i: number) {
+    // TODO use index
+    return (i === 0 ? city.o : city.c);
+}
+
+function getDurationVia(city: City, i: number) {
+    // TODO use index
+    return city.o_d;
+}
+
+function getUrl(city: City, dest: DestinationByCar|DestinationByTrain) {
+    return "https://www.google.com/maps/dir/"
+        + getCityLocation(city)
+        + "/" + encodeURIComponent(isATrainDestination(dest) ? city.via : (<DestinationByCar>dest).location)
+}
+
+function getFullUrl(city: City, destA: DestinationByCar|DestinationByTrain, destB: DestinationByCar|DestinationByTrain) {
+    return "https://www.google.com/maps/dir/"
+        + encodeURIComponent(isATrainDestination(destA) ? city.via : (<DestinationByCar>destA).location)
+        + "/" + getCityLocation(city)
+        + "/" + encodeURIComponent(isATrainDestination(destB) ? city.via : (<DestinationByCar>destB).location)
+       // + "/@45.4719624,5.0736569,11z/"; // TODO update center of map
 }
 
 function getCityLocation(city: City) {

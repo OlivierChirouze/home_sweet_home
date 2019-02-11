@@ -1,28 +1,4 @@
 /// <reference path="../config.ts" />
-
-function getFullUrl(city: City) {
-    let cityLocation = getCityLocation(city);
-    return "https://www.google.com/maps/dir/"
-        + encodeURIComponent(city.via)
-        + "/" + cityLocation
-        + "/" + encodeURIComponent("115 Chemin de l'Islon, 38670 Chasse-sur-Rhône") // FIXME
-        + "/@45.4719624,5.0736569,11z/";
-}
-
-function getOUrl(city: City) {
-    let cityLocation = getCityLocation(city);
-    return "https://www.google.com/maps/dir/"
-        + cityLocation
-        + "/" + encodeURIComponent(city.via); // FIXME
-}
-
-function getCUrl(city: City) {
-    let cityLocation = getCityLocation(city);
-    return "https://www.google.com/maps/dir/"
-        + cityLocation
-        + "/" + encodeURIComponent("115 Chemin de l'Islon, 38670 Chasse-sur-Rhône"); // FIXME
-}
-
 let paragraphs = document.getElementsByTagName("p");
 
 function addCell(index: string, colorFromOrder: string, row: HTMLTableRowElement) {
@@ -65,11 +41,16 @@ for (let i in paragraphs) {
 
                 let table = document.createElement("table");
                 table.style.backgroundColor = colorFromOrder;
+                table.style.border = "solid 1px #8d8d8d"
 
                 let row = document.createElement("tr");
 
                 let link = document.createElement("a");
-                link.href = getFullUrl(city);
+                link.href = getFullUrl(
+                    city,
+                    config.destinations[0],
+                    config.destinations[1]
+                );
                 link.target = "top";
                 link.innerText = city.n;
                 link.style.color = colorFromOrder;
@@ -78,26 +59,15 @@ for (let i in paragraphs) {
                 indexCell.style.color = colorFromOrder;
                 indexCell.appendChild(link);
 
-                // TODO handle this
-                /*
-                let oLink = document.createElement("a");
-                oLink.href = getOUrl(city);
-                oLink.target = "top";
-                oLink.innerText = `(${city.o_d} -> ${city.via})`;
-                oLink.style.color = "black";
-                addCell("", getColorFromDuration(city.o_d, 5, 10, 20), row).appendChild(
-                    oLink
-                );
-                */
-
                 for (let i in config.destinations) {
                     let dest = config.destinations[i];
                     let cLink = document.createElement("a");
-                    cLink.href = getCUrl(city);
+                    cLink.href = getUrl(city, dest);
                     cLink.target = "top";
-                    cLink.innerText = `${dest.for} : ${city.c}`;
+                    let duration = getDuration(city, Number(i));
+                    cLink.innerText = `${dest.for} : ${duration}`;
                     cLink.style.color = "black";
-                    addCell("", getColorFromDuration(city.c, dest.lower, dest.middle, dest.max), row).appendChild(
+                    addCell("", getColorFromDuration(duration, dest.lower, dest.middle, dest.max), row).appendChild(
                         cLink
                     );
                 }
