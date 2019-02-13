@@ -131,6 +131,17 @@ function getUrl(city: City, dest: DestinationByCar|DestinationByTrain) {
     return "https://www.google.com/maps/dir/"
         + getCityLocation(city)
         + "/" + encodeURIComponent(isATrainDestination(dest) ? city.via : (<DestinationByCar>dest).location)
+        + getUrlTimeData(new Date('02/11/2019 08:45')) // Arbitrarily choose a monday at 8:45 time of arrival
+    // TODO make it a config value
+}
+
+function getUrlTimeData(arrivalDate: Date) {
+    // @see https://mstickles.wordpress.com/2015/06/23/gmaps-urls-diropt3/
+    // !6e1 = Arrive by
+    // !7e2 = Calculate from 1/1/70 0:00 Local Time
+    // !8j# specifies the time and day of travel as the number of seconds elapsed since midnight on the morning of January 1, 1970.
+    // Example: https://www.google.com/maps/dir/Embassy+Suites-Crystal+City/Smithsonian+Natural+History+Museum/data=!4m6!4m5!2m3!6e1!7e2!8j1439200200!3e3
+    return `/data=!4m6!4m5!2m3!6e1!7e1!8j${arrivalDate.getTime()/1000}!4e0`
 }
 
 function getFullUrl(city: City, destA: DestinationByCar|DestinationByTrain, destB: DestinationByCar|DestinationByTrain) {
