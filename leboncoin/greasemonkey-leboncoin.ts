@@ -10,6 +10,27 @@ function addCell(index: string, colorFromOrder: string, row: HTMLTableRowElement
     return td;
 }
 
+// First add our stylesheet
+
+let head = document.querySelector("head")
+
+if (head) {
+    let style = document.createElement("style")
+
+    style.innerHTML = `
+    table.city {
+        border-spacing: 2px;
+        border-collapse: separate;
+    }
+    
+    table.city td { 
+        padding: 3px;
+    }
+    `
+
+    head.appendChild(style)
+}
+
 for (let i in paragraphs) {
     if (paragraphs.hasOwnProperty(i)) {
         let p: HTMLElement = paragraphs[i]
@@ -40,8 +61,8 @@ for (let i in paragraphs) {
                 let colorFromOrder = getColorFromOrder(index);
 
                 let table = document.createElement("table");
-                table.style.backgroundColor = colorFromOrder;
-                table.style.border = "solid 1px #8d8d8d"
+                table.setAttribute("class", "city")
+                table.style.backgroundColor = colorFromOrder
 
                 let row = document.createElement("tr");
 
