@@ -2,8 +2,8 @@
 /// <reference path="../config.ts" />
 
 // To test this with node JS:
-// node -e 'require("./google_apps/home_sweet_home").run();'
-// Expects a config.json file in this directory: see config.example.json
+// node -e 'require("./spreadsheet/home_sweet_home").run();'
+// Expects a config.js file in this directory: see config.example.js
 
 import * as http from "http";
 import Spreadsheet = GoogleAppsScript.Spreadsheet.Spreadsheet
@@ -568,6 +568,7 @@ const nannyColumns = {
     json: ++col,
 };
 
+// TODO move to a different file!!
 function updateNannies() {
     const tab = getTab("nounous Champier");
     if (!tab) {
