@@ -1,5 +1,5 @@
-/// <reference path="./model.ts" />
-/// <reference path="./config.ts" />
+/// <reference path="../model.ts" />
+/// <reference path="../config.ts" />
 
 // To test this with node JS:
 // node -e 'require("./google_apps/home_sweet_home").run();'
@@ -8,13 +8,6 @@
 import * as http from "http";
 import Spreadsheet = GoogleAppsScript.Spreadsheet.Spreadsheet
 import Sheet = GoogleAppsScript.Spreadsheet.Sheet
-
-// ============================================================================================== COPY / PASTE FROM HERE
-// To make this work on Google Spreadsheet,
-// - copy the content of your config.json file
-// - paste it as the value associated with config variable:
-// var config = ...here your paste...
-// TODO make sure the build process injects config here
 
 // Handle Node.js context -----------------------------
 let isGoogleApp = function () {

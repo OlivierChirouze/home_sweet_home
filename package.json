@@ -6,28 +6,29 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build:leboncoin": "tsc leboncoin/greasemonkey-leboncoin.header.ts model.ts config.ts cities.ts leboncoin/greasemonkey-leboncoin.ts --out build/greasemonkey-leboncoin.js --skipLibCheck true",
-    "build:map": "tsc model.ts config.ts cities.ts map/cities_map.ts --out build/cities_map.js --skipLibCheck true"
+    "build:map": "tsc model.ts config.ts cities.ts map/cities_map.ts --out build/cities_map.js --skipLibCheck true",
+    "build:spreadsheet": "tsc model.ts config.ts spreadsheet/home_sweet_home.ts --skipLibCheck true && cat config.js model.js spreadsheet/home_sweet_home.js > build/home_sweet_home.js && rm spreadsheet/home_sweet_home.js && rm config.js && rm model.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/OlivierChirouze/bidouilles.git"
+    "url": "git+https://github.com/OlivierChirouze/home_sweet_home.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/OlivierChirouze/bidouilles/issues"
+    "url": "https://github.com/OlivierChirouze/home_sweet_home/issues"
   },
-  "homepage": "https://github.com/OlivierChirouze/bidouilles#readme",
+  "homepage": "https://github.com/OlivierChirouze/home_sweet_home#readme",
   "dependencies": {
     "@material/button": "^0.42.0",
-    "@types/google-apps-script": "0.0.32",
+    "@types/google-apps-script": "0.0.37",
     "@types/google-maps": "^3.2.0",
     "@types/greasemonkey": "0.0.28",
-    "@types/node": "^10.12.12",
+    "@types/node": "^10.12.26",
     "google-apps-script": "^2.9.2",
     "gulp": "^4.0.0",
     "gulp-typescript": "^5.0.0",
-    "npm": "^6.5.0",
+    "npm": "^6.8.0",
     "stats-lite": "^2.2.0",
     "xmlhttprequest": "^1.8.0"
   },
