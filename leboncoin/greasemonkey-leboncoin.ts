@@ -88,7 +88,7 @@ for (let i in paragraphs) {
                     let duration = getDuration(city, Number(i));
                     cLink.innerText = `${dest.for} : ${duration}`;
                     cLink.style.color = "black";
-                    addCell("", getColorFromDuration(duration, dest.lower, dest.middle, dest.max), row).appendChild(
+                    addCell("", getColorFromDuration(duration, dest.lower, dest.max), row).appendChild(
                         cLink
                     );
                 }

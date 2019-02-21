@@ -5,7 +5,6 @@ const config: Config = {
     {
       "for": "Olivier",
       "lower": 50,
-      "middle": 60,
       "max": 70,
       "trainStations": [
         {
@@ -73,7 +72,6 @@ const config: Config = {
     {
       "for": "Céline",
       "lower": 45,
-      "middle": 50,
       "max": 60,
       "location": "115 Chemin de l'Islon, 38670 Chasse-sur-Rhône"
     }

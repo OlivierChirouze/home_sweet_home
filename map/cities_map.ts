@@ -52,14 +52,15 @@ function updateMarkers(newType: string = type) {
                     case "name":
                         label = "" + (i + 1);
                         if (type === "name") label += " " + markedCity.n;
-                        color = getColorFromOrder(i);
+                        color = getColorFromOrder(i, max);
                         break;
                     case "0":
                     case "1":
                         let duration = getDuration(markedCity, Number(type));
                         label = duration.toString();
                         let destConfig = config.destinations[Number(type)];
-                        color = getColorFromDuration(duration, destConfig.lower, destConfig.middle, destConfig.max);
+                        // TODO make lower and max automatically calculated
+                        color = getColorFromDuration(duration, destConfig.lower, destConfig.max);
                         break;
                 }
 

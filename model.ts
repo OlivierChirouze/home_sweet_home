@@ -1,7 +1,6 @@
 interface Destination {
     for: string,
     lower: number,
-    middle: number,
     max: number
 }
 
@@ -24,7 +23,7 @@ interface Config {
     key: string,
     workOnlyOnLines?: number,
     startAtLine?: number,
-    destinations: (DestinationByCar|DestinationByTrain)[], // For the moment assume there are two elements
+    destinations: (DestinationByCar | DestinationByTrain)[], // For the moment assume there are two elements
 }
 
 interface City {
@@ -47,39 +46,31 @@ interface Journey {
     isOk: boolean,
 }
 
-let isATrainDestination = (o: DestinationByCar|DestinationByTrain) => ("trainStations" in o)
+let isATrainDestination = (o: DestinationByCar | DestinationByTrain) => ("trainStations" in o);
 
 // TODO move these methods to a dedicated file
-function getColorFromOrder(i: number) {
-    // TODO could be configurable
-    let color;
-    if (i <= 20) {
-        color = "#40ff00";
-    } else if (i <= 40) {
-        color = "#54fcff";
-    } else if (i <= 60) {
-        color = "#ffd176";
-    } else {
-        color = "#ff0000";
-    }
+function getColorFromOrder(i: number, max: number) {
 
-    return color;
+    // i == max => 1
+    // i == 0 => 0
+
+    return getColor(i / max);
 }
 
-function getColorFromDuration(durationString: string, a: number, b: number, c: number) {
-    let dur = parseDuration(durationString);
-    let color;
-    if (dur <= a) {
-        color = "#40ff00";
-    } else if (dur <= b) {
-        color = "#54fcff";
-    } else if (dur <= c) {
-        color = "#ffd176";
-    } else {
-        color = "#ff0000";
-    }
+// Stolen from http://jsfiddle.net/jongobar/sNKWK/
+function getColor(value: number) {
+    // value from 0 to 1, 0 is green and 1 is red
+    const hue = ((1 - value) * 120).toString(10);
+    return ["hsl(", hue, ",100%,50%)"].join("");
+}
 
-    return color;
+function getColorFromDuration(durationString: string, min: number, max: number) {
+    let dur = Math.max(Math.min(parseDuration(durationString), max), min);
+
+    // dur == min => 0
+    // dur == max => 1
+
+    return getColor((dur - min) / (max - min));
 }
 
 // Taken from https://css-tricks.com/snippets/javascript/lighten-darken-color/
@@ -127,11 +118,11 @@ function getDurationVia(city: City, i: number) {
     return city.o_d;
 }
 
-function getUrl(city: City, dest: DestinationByCar|DestinationByTrain) {
+function getUrl(city: City, dest: DestinationByCar | DestinationByTrain) {
     return "https://www.google.com/maps/dir/"
         + getCityLocation(city)
         + "/" + encodeURIComponent(isATrainDestination(dest) ? city.via : (<DestinationByCar>dest).location)
-        + getUrlTimeData(new Date('02/11/2019 08:45')) // Arbitrarily choose a monday at 8:45 time of arrival
+        + getUrlTimeData(new Date('02/11/2019 08:45')); // Arbitrarily choose a monday at 8:45 time of arrival
     // TODO make it a config value
 }
 
@@ -141,15 +132,15 @@ function getUrlTimeData(arrivalDate: Date) {
     // !7e2 = Calculate from 1/1/70 0:00 Local Time
     // !8j# specifies the time and day of travel as the number of seconds elapsed since midnight on the morning of January 1, 1970.
     // Example: https://www.google.com/maps/dir/Embassy+Suites-Crystal+City/Smithsonian+Natural+History+Museum/data=!4m6!4m5!2m3!6e1!7e2!8j1439200200!3e3
-    return `/data=!4m6!4m5!2m3!6e1!7e1!8j${arrivalDate.getTime()/1000}!4e0`
+    return `/data=!4m6!4m5!2m3!6e1!7e1!8j${arrivalDate.getTime() / 1000}!4e0`;
 }
 
-function getFullUrl(city: City, destA: DestinationByCar|DestinationByTrain, destB: DestinationByCar|DestinationByTrain) {
+function getFullUrl(city: City, destA: DestinationByCar | DestinationByTrain, destB: DestinationByCar | DestinationByTrain) {
     return "https://www.google.com/maps/dir/"
         + encodeURIComponent(isATrainDestination(destA) ? city.via : (<DestinationByCar>destA).location)
         + "/" + getCityLocation(city)
-        + "/" + encodeURIComponent(isATrainDestination(destB) ? city.via : (<DestinationByCar>destB).location)
-       // + "/@45.4719624,5.0736569,11z/"; // TODO update center of map
+        + "/" + encodeURIComponent(isATrainDestination(destB) ? city.via : (<DestinationByCar>destB).location);
+    // + "/@45.4719624,5.0736569,11z/"; // TODO update center of map
 }
 
 function getCityLocation(city: City) {
