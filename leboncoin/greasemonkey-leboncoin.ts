@@ -31,6 +31,8 @@ if (head) {
     head.appendChild(style)
 }
 
+const nbKnownCities = cities.length;
+
 for (let i in paragraphs) {
     if (paragraphs.hasOwnProperty(i)) {
         let p: HTMLElement = paragraphs[i]
@@ -58,7 +60,7 @@ for (let i in paragraphs) {
 
             if (city !== null) {
                 let index = cities.indexOf(city);
-                let colorFromOrder = getColorFromOrder(index);
+                let colorFromOrder = getColorFromOrder(index, nbKnownCities);
 
                 let table = document.createElement("table");
                 table.setAttribute("class", "city")
