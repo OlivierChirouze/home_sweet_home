@@ -69,24 +69,30 @@ for (let i in paragraphs) {
                 let row = document.createElement("tr");
 
                 let link = document.createElement("a");
-                link.href = getFullUrl(
+                let url = getFullUrl(
                     city,
                     config.destinations[0],
                     config.destinations[1]
                 );
-                link.target = "top";
-                link.innerText = city.n;
-                link.style.color = colorFromOrder;
+                // Use onclick and not href because the parent element is clickable (hence the return false)
+                link.onclick = () => {
+                    window.open(url);
+                    return false;
+                };
+                link.innerText = city.n
 
-                let indexCell = addCell(`${index.toString()} `, "#FFF", row);
-                indexCell.style.color = colorFromOrder;
+                let indexCell = addCell(`${index.toString()} `, colorFromOrder, row);
                 indexCell.appendChild(link);
 
                 for (let i in config.destinations) {
                     let dest = config.destinations[i];
                     let cLink = document.createElement("a");
-                    cLink.href = getUrl(city, dest);
-                    cLink.target = "top";
+                    // Use onclick and not href because the parent element is clickable (hence the return false)
+                    let cUrl = getUrl(city, dest);
+                    cLink.onclick = () => {
+                        window.open(cUrl);
+                        return false;
+                    };
                     let duration = getDuration(city, Number(i));
                     cLink.innerText = `${dest.for} : ${duration}`;
                     cLink.style.color = "black";
