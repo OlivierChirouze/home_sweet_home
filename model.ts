@@ -139,7 +139,9 @@ function getFullUrl(city: City, destA: DestinationByCar | DestinationByTrain, de
     return "https://www.google.com/maps/dir/"
         + encodeURIComponent(isATrainDestination(destA) ? city.via : (<DestinationByCar>destA).location)
         + "/" + getCityLocation(city)
-        + "/" + encodeURIComponent(isATrainDestination(destB) ? city.via : (<DestinationByCar>destB).location);
+        + "/" + encodeURIComponent(isATrainDestination(destB) ? city.via : (<DestinationByCar>destB).location)
+        + getUrlTimeData(new Date('02/11/2019 08:45')); // Arbitrarily choose a monday at 8:45 time of arrival
+    // TODO make it a config value
     // + "/@45.4719624,5.0736569,11z/"; // TODO update center of map
 }
 
