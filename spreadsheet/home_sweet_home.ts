@@ -339,7 +339,7 @@ function step1_getListOfCities() {
     // TODO this is a manual step:
     // visit Wikipedia. Example https://fr.wikipedia.org/wiki/Liste_des_communes_du_Rh%C3%B4ne
     // Copy the table. Plugins exist to help: https://chrome.google.com/webstore/detail/table-capture/iebpjdmgckacbodjpijphcplhebcmeop
-    // Make sure "code postal" is the third column
+    // Make sure "postal code" is the third column
     // Paste it in spreadsheet at first column
 
 }
@@ -548,6 +548,13 @@ function step3_updateToFromDurations() {
     }
 }
 
+/**
+ *
+ */
+function step4_extractCities() {
+    // TODO this is a manual step, should be automatized as a file to download
+}
+
 // ------------------------------------------------------------- Nannies
 // TODO extract to a dedicated file
 
@@ -567,8 +574,6 @@ const nannyColumns = {
     lng: ++col,
     json: ++col,
 };
-
-// TODO move to a different file!!
 function updateNannies() {
     const tab = getTab("nounous Champier");
     if (!tab) {
