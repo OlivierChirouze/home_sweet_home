@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npm run build:leboncoin; npm run build:map; npm run build:spreadsheet;",
     "build:leboncoin": "tsc leboncoin/greasemonkey-leboncoin.header.ts model.ts config.ts cities.ts leboncoin/greasemonkey-leboncoin.ts --out build/greasemonkey-leboncoin.js --skipLibCheck true",
     "build:map": "tsc model.ts config.ts cities.ts map/cities_map.ts --out build/cities_map.js --skipLibCheck true",
     "build:spreadsheet": "tsc model.ts config.ts spreadsheet/home_sweet_home.ts --skipLibCheck true && cat config.js model.js spreadsheet/home_sweet_home.js > build/home_sweet_home.js && rm spreadsheet/home_sweet_home.js && rm config.js && rm model.js"
