@@ -1,4 +1,6 @@
-/// /// <reference path="./model.ts" /> ../node_modules/stats-lite/stats.js
+/// <reference path="../model.ts" />
+
+// TODO "max" select input should be injected to have appropriate values suggested
 
 const forEach = function <T extends Node>(array: NodeListOf<T>, callback: (i: number, t: T) => any) {
     for (let i = 0; i < array.length; i++) {
@@ -19,11 +21,29 @@ let type = "order";
 let map: google.maps.Map;
 let markedCities: MarkedCity[] = [];
 
+function resetMarkers() {
+    markedCities.forEach((m) => {
+        m.marker.setMap(null);
+    });
+
+    markedCities = [];
+}
+
+let citiesMapSweetHome = new HomeSweetHome(cities, config);
+(<any>document).getElementById("max").value = config.limit;
+
+function changeLimit(newLimit: string) {
+    // TODO optimize
+    config.limit = newLimit == 'All' ? cities.length : Number(newLimit);
+    citiesMapSweetHome = new HomeSweetHome(cities, config);
+    initMap();
+}
+
 interface MarkedCity extends City {
     marker: google.maps.Marker;
 }
 
-config.destinations.forEach((dest: any, i: number) => {
+citiesMapSweetHome.config.destinations.forEach((dest: any, i: number) => {
         let button = document.createElement('button');
         let newType = i.toString();
         button.innerText = dest.for;
@@ -40,27 +60,28 @@ addScript("https://maps.googleapis.com/maps/api/js?key=" + config.key + "&callba
 
 function updateMarkers(newType: string = type) {
     type = newType;
-    let max = (<any>document).getElementById("max").value;
+
+    const destinationOutputs = citiesMapSweetHome.getDestinationOutputs();
 
     markedCities.forEach((markedCity: MarkedCity, i: number) => {
-            if (i + 1 <= max) {
-                let label = "";
-                let color = "";
+            let label = "";
+            let color = "";
 
                 switch (type) {
                     case "order":
                     case "name":
                         label = "" + (i + 1);
                         if (type === "name") label += " " + markedCity.n;
-                        color = getColorFromOrder(i, max);
+                        color = getColorFromOrder(i, citiesMapSweetHome.config.limit);
                         break;
                     case "0":
                     case "1":
-                        let duration = getDuration(markedCity, Number(type));
+                        let destIndex = Number(type);
+                        let duration = getDurationString(markedCity, destIndex);
                         label = duration.toString();
-                        let destConfig = config.destinations[Number(type)];
-                        // TODO make lower and max automatically calculated
-                        color = getColorFromDuration(duration, destConfig.lower, destConfig.max);
+                        let min = destinationOutputs[destIndex].min;
+                        let max = destinationOutputs[destIndex].max;
+                        color = getColorFromDuration(duration, min, max);
                         break;
                 }
 
@@ -70,13 +91,11 @@ function updateMarkers(newType: string = type) {
                 icon.strokeColor = color;
 
                 markedCity.marker.setOpacity(1);
-            } else {
-                markedCity.marker.setOpacity(0);
-            }
 
-            // Refresh
-            markedCity.marker.setMap(null);
-            markedCity.marker.setMap(map);
+
+                // Refresh
+                markedCity.marker.setMap(null);
+                markedCity.marker.setMap(map);
         }
     );
 
@@ -91,13 +110,11 @@ function updateMarkers(newType: string = type) {
 }
 
 function initMap() {
-    const geocoder = new google.maps.Geocoder();
-
-    function addMarker(position: number): void {
+    function addMarker(position: number, city: City): void {
 
         const displayPos = position + 1;
 
-        const markedCity = <MarkedCity>cities[position];
+        const markedCity = <MarkedCity>city;
 
         const location = {
             lat: Number(markedCity.lat.replace(',', '.')),
@@ -116,9 +133,9 @@ function initMap() {
         let title = markedCity.n;
 
         config.destinations.forEach((dest: any, i: number) => {
-                title += `\n${dest.for}: ${getDuration(markedCity, i)}`;
+                title += `\n${dest.for}: ${getDurationString(markedCity, i)}`;
                 if (isATrainDestination(dest))
-                    title += ` (${getDurationVia(markedCity, i)})\n`;
+                    title += ` (${getDurationStringVia(markedCity, i)})\n`;
             }
         );
 
@@ -161,7 +178,11 @@ function initMap() {
         markedCities.push(markedCity);
     }
 
-    cities.forEach((city: City, position: number) => addMarker(position));
+    resetMarkers();
+
+    // Create a marker for all cities, not limited
+    citiesMapSweetHome.getCities()
+        .forEach((city: ScoredCity, position: number) => addMarker(position, city));
 
     updateMarkers(type);
 }

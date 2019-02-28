@@ -1,6 +1,10 @@
 interface Destination {
     for: string,
-    lower: number,
+    percent: number
+}
+
+interface DestinationOutput {
+    min: number,
     max: number
 }
 
@@ -23,13 +27,14 @@ interface Config {
     key: string,
     workOnlyOnLines?: number,
     startAtLine?: number,
-    destinations: (DestinationByCar | DestinationByTrain)[], // For the moment assume there are two elements
+    limit: number,
+    destinations: (DestinationByCar | DestinationByTrain)[], // For the moment assume there are two elements in this list
 }
 
 interface City {
     n: string,
     cp: string,
-    o: string,
+    o: string, // TODO should be a list (use index)
     o_d: string,
     c: string,
     lat: string,
@@ -48,13 +53,118 @@ interface Journey {
 
 let isATrainDestination = (o: DestinationByCar | DestinationByTrain) => ("trainStations" in o);
 
+// TODO find an appropriate name
+class ScoredCity implements City {
+    public score: number = 0;
+
+    c: string;
+    cp: string;
+    lat: string;
+    lng: string;
+    n: string;
+    o: string;
+    o_d: string;
+    via: string;
+
+    constructor(city: City) {
+        this.c = city.c;
+        this.cp = city.cp;
+        this.lat = city.lat;
+        this.lng = city.lng;
+        this.n = city.n;
+        this.o = city.o;
+        this.o_d = city.o_d;
+        this.via = city.via;
+    }
+
+    public updateScore(config: Config) {
+        this.score = getCityScore(this, config);
+    }
+}
+
+function getCityScore(city: City, config: Config): number {
+    // Basic rule is "minimize total duration"
+    //return getTotalDuration(city);
+    // Other approach: you know the "optimum" for each destination and try to get as close as possible to this optimum
+    // return Math.abs(getDuration(city, 0) - getOptimumForDestination(config.destinations[0]))
+    //    + Math.abs(getDuration(city, 1) - getOptimumForDestination(config.destinations[1]))
+    // Other approach: weight duration per destination
+    // return getDuration(city, 0) * config.destinations[0].percent
+    //     + getDuration(city, 1) * config.destinations[1].percent;
+    const duration0 = getDuration(city, 0);
+    const duration1 = getDuration(city, 1);
+    const totalDuration = duration0 + duration1;
+
+    const ratio = duration0 / totalDuration;
+
+    // What the difference between the actual ratio and the "ideal" ratio?
+    // TODO should check that percent for destination1 is coherent (1 - destination0)
+    const ratioDiff = Math.abs(config.destinations[0].percent / 100 - ratio);
+
+    // Weight the total duration with the difference with ideal ratio
+    return totalDuration * (1 + ratioDiff);
+}
+
+class HomeSweetHome {
+    protected cities: ScoredCity[];
+
+    constructor(cities: City[], public config: Config) {
+        this.cities = [];
+        // Calculate min and max for each destination
+        cities.forEach((c) => {
+            this.cities.push(new ScoredCity(c));
+        });
+
+        // Now sort the list
+        this.sort();
+    }
+
+    public getDestinationOutputs(): DestinationOutput[] {
+
+        let outputs: DestinationOutput[] = [];
+
+        // Update min and max on the remaining cities
+        this.getCities().forEach((c) => {
+            this.config.destinations.forEach((d, i) => {
+                let duration = getDuration(c, i);
+                if (!outputs[i]) {
+                    outputs[i] = {min: duration, max: duration};
+                } else {
+                    if (duration < outputs[i].min) {
+                        outputs[i].min = duration;
+                    }
+                    if (duration > outputs[i].max) {
+                        outputs[i].max = duration;
+                    }
+                }
+            });
+        });
+
+        return outputs;
+    }
+
+    public getCities(): ScoredCity[] {
+        return this.cities.slice(0, this.config.limit);
+    }
+
+    public sort() {
+        // Calculate score for each city
+        this.cities.forEach((c) => c.updateScore(config));
+        // Sort by score
+        this.cities.sort((a, b) => a.score - b.score);
+    }
+}
+
+
 // TODO move these methods to a dedicated file
 function getColorFromOrder(i: number, max: number) {
 
     // i == max => 1
     // i == 0 => 0
 
-    return getColor(i / max);
+    // We allow position to be more than max but then consider is max
+    let position = Math.min(i, max);
+    return getColor(position / max);
 }
 
 // Stolen from http://jsfiddle.net/jongobar/sNKWK/
@@ -73,47 +183,22 @@ function getColorFromDuration(durationString: string, min: number, max: number) 
     return getColor((dur - min) / (max - min));
 }
 
-// Taken from https://css-tricks.com/snippets/javascript/lighten-darken-color/
-function LightenDarkenColor(col: string, amt: number) {
-
-    let usePound = false;
-
-    if (col[0] == "#") {
-        col = col.slice(1);
-        usePound = true;
-    }
-
-    const num = parseInt(col, 16);
-
-    let r = (num >> 16) + amt;
-
-    if (r > 255) r = 255;
-    else if (r < 0) r = 0;
-
-    let b = ((num >> 8) & 0x00FF) + amt;
-
-    if (b > 255) b = 255;
-    else if (b < 0) b = 0;
-
-    let g = (num & 0x0000FF) + amt;
-
-    if (g > 255) g = 255;
-    else if (g < 0) g = 0;
-
-    return (usePound ? "#" : "") + (g | (b << 8) | (r << 16)).toString(16);
-}
-
 function parseDuration(durationString: string) {
     let arr = durationString.split(":");
     return Number(arr[0]) * 60 + Number(arr[1]);
 }
 
-function getDuration(city: City, i: number) {
+function getDurationString(city: City, i: number): string {
     // TODO use index
     return (i === 0 ? city.o : city.c);
 }
 
-function getDurationVia(city: City, i: number) {
+// TODO move to class
+function getDuration(city: City, i: number): number {
+    return parseDuration(getDurationString(city, i));
+}
+
+function getDurationStringVia(city: City, i: number) {
     // TODO use index
     return city.o_d;
 }

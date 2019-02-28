@@ -1,11 +1,11 @@
+// @ts-ignore
 const config: Config = {
   "key" : "yourGoogleAPIKey",
-  "workOnlyOnLines": 10,
+  limit: 300,
   "destinations": [
     {
       "for": "Olivier",
-      "lower": 50,
-      "max": 70,
+      percent: 50,
       "trainStations": [
         {
           "name": "Saint-André-le-Gaz",
@@ -71,8 +71,7 @@ const config: Config = {
     },
     {
       "for": "Céline",
-      "lower": 45,
-      "max": 60,
+      percent: 50,
       "location": "115 Chemin de l'Islon, 38670 Chasse-sur-Rhône"
     }
   ]

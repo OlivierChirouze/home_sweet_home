@@ -25,11 +25,14 @@ if (!isGoogleApp) {
     var Logger = console;
 }
 
+let workOnlyOnLines: undefined|number = undefined; //100;
+let startAtLine: undefined|number = undefined; //10;
+
 // ----------------------------------------------------
 
 
 function isLineNumberOk(row: number): boolean {
-    return config.workOnlyOnLines === undefined || row < config.workOnlyOnLines;
+    return workOnlyOnLines === undefined || row < workOnlyOnLines;
 }
 
 // ---------------------------------------------------------- DATA MODEL
@@ -278,8 +281,8 @@ function findJourneysToStations(from: string, trainStations: TrainStation[], cal
 
 const headerHeight = 1;
 
-const startRow = (config.startAtLine != null)
-    ? config.startAtLine
+const startRow = (startAtLine !== undefined)
+    ? startAtLine
     : headerHeight + 1;
 
 function getDoc(): Spreadsheet | null {
@@ -347,6 +350,7 @@ function step1_getListOfCities() {
 /**
  * Update table for each existing city in the table, store GPS location
  * TODO extract spreadsheet part
+ * TODO add a menu or button to the UI
  */
 function step2_updateFromGPSLocations() {
     const tab = getTab("communes");
@@ -549,7 +553,7 @@ function step3_updateToFromDurations() {
 }
 
 /**
- *
+ * TODO add a menu or button to the UI
  */
 function step4_extractCities() {
     // TODO this is a manual step, should be automatized as a file to download

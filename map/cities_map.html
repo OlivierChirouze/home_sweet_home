@@ -21,17 +21,22 @@
 <body>
 <div id="header">
     top :
-    <select id="max" onchange="updateMarkers()">
+    <select id="max" onchange="changeLimit(this.value)">
         <option>10</option>
         <option>20</option>
-        <option selected>30</option>
+        <option>30</option>
         <option>40</option>
         <option>50</option>
         <option>60</option>
         <option>80</option>
         <option>90</option>
         <option>100</option>
-        <option>110</option>
+        <option>150</option>
+        <option>200</option>
+        <option>300</option>
+        <option>400</option>
+        <option>500</option>
+        <option>All</option>
     </select>
     <a href="javascript:updateMarkers('order');" class="mdl-button mdl-js-button" id="btn_order">Classement</a>
     <a href="javascript:updateMarkers('name');" class="mdl-button mdl-js-button" id="btn_name">Noms</a>

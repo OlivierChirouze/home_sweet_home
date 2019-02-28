@@ -21,22 +21,30 @@ if (head) {
     table.city {
         border-spacing: 2px;
         border-collapse: separate;
+        border-radius: 6px;
     }
     
     table.city td { 
         padding: 3px;
     }
+    
+    table.city td a {
+        color: black;
+    }
     `
 
     head.appendChild(style)
 }
+let greaseMonkeySweetHome = new HomeSweetHome(cities, config);
+const destinationOutputs = greaseMonkeySweetHome.getDestinationOutputs();
 
-const nbKnownCities = cities.length;
+// We consider the worse position for a city is after limit
+const maxPositionCity = Math.min(greaseMonkeySweetHome.getCities().length, greaseMonkeySweetHome.config.limit);
 
 for (let i in paragraphs) {
     if (paragraphs.hasOwnProperty(i)) {
         let p: HTMLElement = paragraphs[i]
-        if (p.attributes.hasOwnProperty("itemprop") && (<any>p.attributes["itemprop"]).value == "availableAtOrFrom") {
+        if (p.attributes.hasOwnProperty("itemprop") && (p.attributes[<any>"itemprop"]).value == "availableAtOrFrom") {
             let pCity = (<string>p.textContent).split(' ');
             let city: City | null = null;
 
@@ -60,7 +68,7 @@ for (let i in paragraphs) {
 
             if (city !== null) {
                 let index = cities.indexOf(city);
-                let colorFromOrder = getColorFromOrder(index, nbKnownCities);
+                let colorFromOrder = getColorFromOrder(index, maxPositionCity);
 
                 let table = document.createElement("table");
                 table.setAttribute("class", "city")
@@ -93,10 +101,9 @@ for (let i in paragraphs) {
                         window.open(cUrl);
                         return false;
                     };
-                    let duration = getDuration(city, Number(i));
+                    let duration = getDurationString(city, Number(i));
                     cLink.innerText = `${dest.for} : ${duration}`;
-                    cLink.style.color = "black";
-                    addCell("", getColorFromDuration(duration, dest.lower, dest.max), row).appendChild(
+                    addCell("", getColorFromDuration(duration, destinationOutputs[i].min, destinationOutputs[i].max), row).appendChild(
                         cLink
                     );
                 }
@@ -108,9 +115,6 @@ for (let i in paragraphs) {
 
                 table.appendChild(row);
                 p.appendChild(table);
-
-                // Finally set parent color
-                (<HTMLElement>(<HTMLElement>p.parentElement).parentElement).style.borderColor = LightenDarkenColor(colorFromOrder, 50);
             } else {
                 console.error(`Ville non trouvée : ${pCity}`);
             }
