@@ -1,35 +1,43 @@
 # Home Sweet Home
 
-## Presentation
-A set of tools to help you find the perfect spot to live.
+A set of tools to help you find the perfect home spot to live, optimizing commute time.
 
 ## Usage
 ### Google spreadsheet
-The Google spreadsheet will query a list of spots and evaluate if they fit.
+The Google spreadsheet will query a list of home spots and evaluate if they fit.
 
 Feel free to sort it by any column of your choice.
 Some clickable columns will bring you to Google Maps.
 ![Google Spreadsheet](./doc/Spreadsheet.png "List of cities")
 
 ### Map
-A map of spots with a color code to ease your decision!
+A map of home spots with a color code to ease your decision!
 ![Map](./doc/Top.png "Map of cities")
-Changing the number of spots to display will update the coloring
 
-You can switch view between:
-- position of each spot on the podium
-- names of the spots
-- position of each spot regarding each destination
+At the top of the page you can:
+- change the number of home spots to display, which will also update the color code
+- switch view between:
+    - position of each spot on the podium
+    - names of the spots
+    - relevance of the spots regarding each workplace
 
-A click 
+Hover a home spot to get more information
+
+Click on the home spot to open Google Maps with itinerary to the current selected workplace or the complete journey.
+Itineraries are calculated for **a monday morning**.
 
 ### Le bon coin
 - a plugin for www.leboncoin.fr
 ![LeBonCoin](./doc/LeBonCoin.png "plugin for leboncoin")
 
+Visit www.leboncoin.fr or other variant, search for real estate
 
-1. Visit www.leboncoin.fr or other variant, search for real estate
-1. Enjoy
+Every time the name of a home spot is recognized, it is replaced with a small table giving:
+- position of the spot on the podium
+- its relevance (color code)
+- the commute time for each work place (with color code)
+   
+All columns are clickable and will bring you to Google Maps. Itineraries are calculated for **a monday morning**.
 
 # Installation
 
@@ -59,6 +67,8 @@ A click
 1. [TODO should not be needed] Delete "absurd" cities at the end of the list (mislocated by Google)
 
 ## Map
+
+TO BE COMPLETED
 
 ## Le Bon Coin
 1. Install GreaseMonkey extension on Firefox or TamperMonkey extension on Chrome.
