@@ -195,6 +195,7 @@ function getDurationString(city: City, i: number): string {
 
 // TODO move to class
 function getDuration(city: City, i: number): number {
+    // TODO Should store duration number in file, not string!
     return parseDuration(getDurationString(city, i));
 }
 

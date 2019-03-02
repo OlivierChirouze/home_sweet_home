@@ -66,36 +66,59 @@ function updateMarkers(newType: string = type) {
     markedCities.forEach((markedCity: MarkedCity, i: number) => {
             let label = "";
             let color = "";
+            let url = "";
 
-                switch (type) {
-                    case "order":
-                    case "name":
-                        label = "" + (i + 1);
-                        if (type === "name") label += " " + markedCity.n;
-                        color = getColorFromOrder(i, citiesMapSweetHome.config.limit);
-                        break;
-                    case "0":
-                    case "1":
-                        let destIndex = Number(type);
-                        let duration = getDurationString(markedCity, destIndex);
-                        label = duration.toString();
-                        let min = destinationOutputs[destIndex].min;
-                        let max = destinationOutputs[destIndex].max;
-                        color = getColorFromDuration(duration, min, max);
-                        break;
-                }
+            switch (type) {
+                case "order":
+                case "name":
+                    label = "" + (i + 1);
+                    if (type === "name") label += " " + markedCity.n;
+                    color = getColorFromOrder(i, citiesMapSweetHome.config.limit);
 
-                markedCity.marker.setLabel(label);
-                let icon = (<google.maps.Symbol>markedCity.marker.getIcon());
-                icon.fillColor = color;
-                icon.strokeColor = color;
+                    // Complete journey
+                    url = getFullUrl(
+                        markedCity,
+                        config.destinations[0],
+                        config.destinations[1]
+                    );
 
-                markedCity.marker.setOpacity(1);
+                    break;
+                case "0":
+                case "1":
+                    let destIndex = Number(type);
+                    let duration = getDurationString(markedCity, destIndex);
+                    label = duration.toString();
+                    let min = destinationOutputs[destIndex].min;
+                    let max = destinationOutputs[destIndex].max;
+                    color = getColorFromDuration(duration, min, max);
 
+                    // Journey to destination
+                    url = getUrl(
+                        markedCity,
+                        config.destinations[destIndex],
+                    );
 
-                // Refresh
-                markedCity.marker.setMap(null);
-                markedCity.marker.setMap(map);
+                    break;
+            }
+
+            markedCity.marker.setLabel(label);
+            let icon = (<google.maps.Symbol>markedCity.marker.getIcon());
+            icon.fillColor = color;
+            icon.strokeColor = color;
+
+            markedCity.marker.setOpacity(1);
+
+            // On click
+            markedCity.marker.addListener('click', function (event) {
+                window.open(
+                    url,
+                    markedCity.n
+                );
+            });
+
+            // Refresh
+            markedCity.marker.setMap(null);
+            markedCity.marker.setMap(map);
         }
     );
 
@@ -130,15 +153,19 @@ function initMap() {
         }
 
         // https://developers.google.com/maps/documentation/javascript/reference/3.exp/marker#MarkerOptions
-        let title = markedCity.n;
 
+        // Build a title to show on mouse over
+        let title = markedCity.n;
+        let durations: number[] = config.destinations.map((dest: any, i: number) => getDuration(markedCity, i));
+        let total = durations.reduce((a, b) => a + b);
         config.destinations.forEach((dest: any, i: number) => {
-                title += `\n${dest.for}: ${getDurationString(markedCity, i)}`;
+            let duration = durations[i];
+            let percentage = Math.floor(duration / total * 100);
+                title += `\n${dest.for}: ${duration} - ${percentage}%`;
                 if (isATrainDestination(dest))
-                    title += ` (${getDurationStringVia(markedCity, i)})\n`;
+                    title += ` (${getDurationStringVia(markedCity, i)})`;
             }
         );
-
         if (isATrainDestination(config.destinations[0]) || isATrainDestination(config.destinations[1]))
             title += "via " + markedCity.via;
 
@@ -160,19 +187,6 @@ function initMap() {
             zIndex: 1 / displayPos,
             clickable: true,
             opacity: 0
-        });
-
-        markedCity.marker.addListener('click', function (event) {
-            const url = getFullUrl(
-                markedCity,
-                config.destinations[0],
-                config.destinations[1]
-            );
-
-            window.open(
-                url,
-                markedCity.n
-            );
         });
 
         markedCities.push(markedCity);
