@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "npm run build:leboncoin; npm run build:map; npm run build:spreadsheet;",
     "build:leboncoin": "tsc leboncoin/greasemonkey-leboncoin.header.ts model.ts config.ts cities.ts leboncoin/greasemonkey-leboncoin.ts --out build/greasemonkey-leboncoin.js --skipLibCheck true",
-    "build:map": "tsc model.ts config.ts cities.ts map/cities_map.ts --out build/cities_map.js --skipLibCheck true",
+    "build:map": "tsc model.ts config.ts cities.ts map/cities_map.ts --out build/map/cities_map.js --skipLibCheck true; cat map/cities_map.html | sed 's/\\.\\.\\/build\\/map\\/cities_map\\.js/cities_map.js/g' > build/map/cities_map.html",
     "build:spreadsheet": "tsc model.ts config.ts spreadsheet/home_sweet_home.ts --skipLibCheck true && cat config.js model.js spreadsheet/home_sweet_home.js > build/home_sweet_home.js && rm spreadsheet/home_sweet_home.js && rm config.js && rm model.js"
   },
   "repository": {
@@ -26,6 +26,7 @@
     "@types/google-maps": "^3.2.0",
     "@types/greasemonkey": "0.0.28",
     "@types/node": "^10.12.26",
+    "fs-observable": "^4.1.14",
     "google-apps-script": "^2.9.2",
     "gulp": "^4.0.0",
     "gulp-typescript": "^5.0.0",
